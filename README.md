@@ -7,6 +7,8 @@ Example usage: `npm run example`
 
 Advanced usage: `npm start -- ../messages.json ../game3.json`
 
+Run a [telegram](https://github.com/telegraf/telegraf) bot: `BOT_TOKEN=xxx npm run tg-bot -- ../messages.json ../game3.json`
+
 Tests: `npm test`
 
 Format of game.json: `Array<Array<string, string>>`

@@ -1,4 +1,5 @@
 import move, { generateIndexes } from './game';
+import shuffleArray from './shuffle';
 
 function formatQuestion({ question, answers }) {
   return `${question}: [${answers.map((a, i) => `**[${i}]** ${a}`).join(', ')}]`;
@@ -50,5 +51,26 @@ export default function play({
       return ret;
     }
     return { answer: check(answer) };
+  };
+}
+
+export function infinitePlay({ facts, shuffle = shuffleArray, ...overrides }) {
+  function format(q) {
+    return q;
+  }
+  let nextMove = play({
+    facts, ...overrides, format,
+  });
+
+  return (message) => {
+    let currentMove = nextMove(message);
+    const answer = currentMove.answer ? currentMove.answer.join('\n') : 'Hello!';
+    if (!currentMove.question) {
+      nextMove = play({
+        facts: shuffle(facts), ...overrides, format,
+      });
+      currentMove = nextMove();
+    }
+    return { answer, ...currentMove.question };
   };
 }

@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node --require babel-register src/index.js",
     "example": "node --require babel-register src/index.js tests/messages.json tests/game1.json",
+    "tg-bot": "node --require babel-register src/tg-bot.js tests/messages.json tests/game1.json",
     "lint": "eslint src tests",
     "test": "mocha --require babel-register tests"
   },
@@ -30,7 +31,8 @@
   "dependencies": {
     "marked": "^0.3.6",
     "marked-terminal": "^2.0.0",
-    "shuffle-array": "^1.0.1"
+    "shuffle-array": "^1.0.1",
+    "telegraf": "^3.15.3"
   },
   "pre-commit": [
     "lint",

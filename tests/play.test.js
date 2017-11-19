@@ -1,6 +1,6 @@
 import assert from 'assert';
 import sinon from 'sinon';
-import play from '../src/play';
+import play, { infinitePlay } from '../src/play';
 import { viewN1Move, view1NMove } from '../src/game';
 
 function playWith(overrides) {
@@ -43,5 +43,30 @@ describe('play', () => {
   it('plays a 1-N game with correct answer', () => {
     const nextMove = playWith({ viewMove: view1NMove });
     assert.equal(nextMove().question, 'read: [**[0]** lesen, **[1]** schreiben]');
+  });
+});
+
+describe('infinitePlay', () => {
+  it('runs forever', () => {
+    const nextMove = infinitePlay({
+      facts: [['read', 'lesen'], ['write', 'schreiben']],
+      messages: { positive: ['Right! ✓'], negative: ['Wrong! ✕'] },
+      viewMove: viewN1Move,
+      rand: sinon.stub().returns(0),
+      shuffle: a => a,
+    });
+    assert.deepEqual(nextMove(), {
+      answer: 'Hello!',
+      question: 'lesen',
+      answers: ['read', 'write'],
+    });
+    const expected = {
+      answer: '~~Wrong! ✕~~',
+      question: 'lesen',
+      answers: ['read', 'write'],
+    };
+    assert.deepEqual(nextMove(1), expected);
+    assert.deepEqual(nextMove(1), expected);
+    assert.deepEqual(nextMove(1), expected);
   });
 });
