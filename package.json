@@ -1,0 +1,39 @@
+{
+  "name": "text-quiz-game",
+  "version": "1.0.0",
+  "description": "Text quiz game - match words with their meaning or examples of usage",
+  "main": "index.js",
+  "scripts": {
+    "start": "node --require babel-register src/index.js",
+    "example": "node --require babel-register src/index.js tests/messages.json tests/game1.json",
+    "lint": "eslint src tests",
+    "test": "mocha --require babel-register tests"
+  },
+  "keywords": [
+    "text",
+    "quiz",
+    "language",
+    "learning"
+  ],
+  "author": "Vladimir Goldobin",
+  "license": "ISC",
+  "devDependencies": {
+    "babel-preset-airbnb": "^2.4.0",
+    "babel-register": "^6.26.0",
+    "eslint": "^4.11.0",
+    "eslint-config-airbnb-base": "^12.1.0",
+    "eslint-plugin-import": "^2.8.0",
+    "mocha": "^4.0.1",
+    "pre-commit": "^1.2.2",
+    "sinon": "^4.1.2"
+  },
+  "dependencies": {
+    "marked": "^0.3.6",
+    "marked-terminal": "^2.0.0",
+    "shuffle-array": "^1.0.1"
+  },
+  "pre-commit": [
+    "lint",
+    "test"
+  ]
+}
