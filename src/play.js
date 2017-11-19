@@ -1,11 +1,11 @@
 import move, { generateIndexes } from './game';
 
-function format({ question, answers }) {
+function formatQuestion({ question, answers }) {
   return `${question}: [${answers.map((a, i) => `**[${i}]** ${a}`).join(', ')}]`;
 }
 
 export default function play({
-  facts, messages, ask, write, viewMove, chunk = 3, rand = Math.random,
+  facts, messages, viewMove, chunk = 3, rand = Math.random, format = formatQuestion,
 }) {
   function positive() {
     return messages.positive[Math.floor(rand() * messages.positive.length)];
@@ -17,29 +17,38 @@ export default function play({
 
   const answers = generateIndexes(facts, chunk, rand);
   let factsAnswer = null;
-  let promise = Promise.resolve();
 
   function check(answer) {
-    write(Number.parseInt(answer, 10) === factsAnswer.answer ? `**${positive()} ✓**` : `~~${negative()} ✕~~`);
+    const ret = [];
+    const correct = Number.parseInt(answer, 10) === factsAnswer.answer ||
+      answer === viewMove(factsAnswer).answers[factsAnswer.answer];
+    ret.push(correct ? `**${positive()}**` : `~~${negative()}~~`);
     const explanation = factsAnswer.facts[factsAnswer.answer][2];
     if (explanation) {
-      write(explanation);
+      ret.push(explanation);
     }
+    return ret;
   }
 
   function checkAndAsk(i) {
     return (answer) => {
+      const ret = {};
       if (factsAnswer !== null) {
-        check(answer);
+        ret.answer = check(answer);
       }
       factsAnswer = move(facts, answers, chunk, i);
-      write(format(viewMove(factsAnswer)));
-      return ask();
+      ret.question = format(viewMove(factsAnswer));
+      return ret;
     };
   }
 
-  for (let i = 0; i < facts.length / chunk; i += 1) {
-    promise = promise.then(checkAndAsk(i));
-  }
-  return promise.then(check);
+  let i = 0;
+  return (answer) => {
+    if (i < facts.length / chunk) {
+      const ret = checkAndAsk(i)(answer);
+      i += 1;
+      return ret;
+    }
+    return { answer: check(answer) };
+  };
 }

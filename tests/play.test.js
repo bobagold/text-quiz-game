@@ -3,43 +3,45 @@ import sinon from 'sinon';
 import play from '../src/play';
 import { viewN1Move, view1NMove } from '../src/game';
 
-function playWith({ answer, viewMove = viewN1Move, facts = [['read', 'lesen'], ['write', 'schreiben']] }) {
-  const ask = sinon.stub().returns(Promise.resolve(answer));
-  const write = sinon.spy();
+function playWith(overrides) {
   return play({
-    ask,
-    write,
-    facts,
-    messages: { positive: ['Right!'], negative: ['Wrong!'] },
-    viewMove,
+    facts: [['read', 'lesen'], ['write', 'schreiben']],
+    messages: { positive: ['Right! ✓'], negative: ['Wrong! ✕'] },
+    viewMove: viewN1Move,
     rand: sinon.stub().returns(0),
-  }).then(() => ({ ask, write }));
+    ...overrides,
+  });
 }
 
 describe('play', () => {
-  it('plays a N-1 game with wrong answer', () => playWith({ answer: 1 })
-    .then(({ ask, write }) => {
-      assert(ask.calledOnce);
-      assert(write.calledTwice);
-      assert.equal(write.getCall(0).args[0], 'lesen: [**[0]** read, **[1]** write]');
-      assert.equal(write.getCall(1).args[0], '~~Wrong! ✕~~');
-    }));
-  it('plays a N-1 game with explanation', () => playWith({
-    answer: 1,
-    facts: [['read', 'lesen', 'Read explanation'], ['write', 'schreiben', 'Write explanation']],
-  })
-    .then(({ ask, write }) => {
-      assert(ask.calledOnce);
-      assert(write.calledThrice);
-      assert.equal(write.getCall(2).args[0], 'Read explanation');
-    }));
-  it('plays a N-1 game with correct answer', () => playWith({ answer: 0 })
-    .then(({ write }) => {
-      assert(write.calledTwice);
-      assert.equal(write.getCall(1).args[0], '**Right! ✓**');
-    }));
-  it('plays a 1-N game with correct answer', () => playWith({ answer: 0, viewMove: view1NMove })
-    .then(({ write }) => {
-      assert.equal(write.getCall(0).args[0], 'read: [**[0]** lesen, **[1]** schreiben]');
-    }));
+  it('plays a N-1 game with wrong answer', () => {
+    const nextMove = playWith({});
+    assert.deepEqual(nextMove(), { question: 'lesen: [**[0]** read, **[1]** write]' });
+    assert.deepEqual(nextMove(1), { answer: ['~~Wrong! ✕~~'] });
+  });
+  it('plays two steps', () => {
+    const nextMove = playWith({
+      facts: [['read', 'lesen'], ['write', 'schreiben'], ['go', 'gehen']],
+      chunk: 2,
+    });
+    assert.deepEqual(nextMove(), { question: 'lesen: [**[0]** read, **[1]** write]' });
+    assert.deepEqual(nextMove(1), { answer: ['~~Wrong! ✕~~'], question: 'gehen: [**[0]** go]' });
+    assert.deepEqual(nextMove(0), { answer: ['**Right! ✓**'] });
+  });
+  it('plays a N-1 game with explanation', () => {
+    const nextMove = playWith({
+      facts: [['read', 'lesen', 'Read explanation'], ['write', 'schreiben', 'Write explanation']],
+    });
+    nextMove();
+    assert.deepEqual(nextMove(1), { answer: ['~~Wrong! ✕~~', 'Read explanation'] });
+  });
+  it('plays a N-1 game with correct answer', () => {
+    const nextMove = playWith({});
+    nextMove();
+    assert.equal(nextMove(0).answer, '**Right! ✓**');
+  });
+  it('plays a 1-N game with correct answer', () => {
+    const nextMove = playWith({ viewMove: view1NMove });
+    assert.equal(nextMove().question, 'read: [**[0]** lesen, **[1]** schreiben]');
+  });
 });

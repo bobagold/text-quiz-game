@@ -14,3 +14,7 @@ Format of game.json: `Array<Array<string, string>>`
 Format of messages.json: `{positive: Array<string>, negative: Array<string>}`
 
 ![Screenshot 1](/docs/screenshot01.png?raw=true "Screenshot 1")
+
+## Links
+
+* inspired by [nicksellen/german](https://github.com/nicksellen/german)

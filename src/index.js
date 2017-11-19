@@ -19,8 +19,23 @@ const rl = readline.createInterface({
 const ask = () => new Promise(resolve => rl.question('', resolve));
 const write = t => rl.write(markdown(`${t}\n`));
 
-const promise = play({
-  facts, messages, chunk, ask, write, rand, viewMove: viewN1Move,
+const nextMove = play({
+  facts, messages, chunk, rand, viewMove: viewN1Move,
 });
+
+let promise = Promise.resolve();
+for (let i = 0; i < (facts.length / chunk) + 1; i += 1) {
+  promise = promise.then((answer) => {
+    const move = nextMove(answer);
+    if (move.answer) {
+      move.answer.forEach(write);
+    }
+    if (move.question) {
+      write(move.question);
+      return ask();
+    }
+    return null;
+  });
+}
 
 promise.then(() => write('done')).then(() => rl.close());
