@@ -11,7 +11,7 @@ const rand = Math.random;
 const facts = shuffle(load(readFileSync(process.argv[process.argv.length - 1])));
 const messages = load(readFileSync(process.argv[process.argv.length - 2]));
 
-const chunk = 3;
+const chunk = 5;
 const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout,
@@ -29,6 +29,7 @@ for (let i = 0; i < (facts.length / chunk) + 1; i += 1) {
     const move = nextMove(answer);
     if (move.answer) {
       move.answer.forEach(write);
+      write('');
     }
     if (move.question) {
       write(move.question);

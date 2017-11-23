@@ -15,7 +15,9 @@ Format of game.json: `Array<Array<string, string>>`
 
 Format of messages.json: `{positive: Array<string>, negative: Array<string>}`
 
-![Screenshot 1](/docs/screenshot01.png?raw=true "Screenshot 1")
+![Console game screenshot](/docs/screenshot01.png?raw=true "Console game screenshot")
+
+![Telegram bot screenshot](/docs/screenshot02.png?raw=true "Telegram bot screenshot")
 
 ## Links
 

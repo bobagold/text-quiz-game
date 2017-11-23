@@ -20,15 +20,11 @@ export default function play({
   let factsAnswer = null;
 
   function check(answer) {
-    const ret = [];
     const correct = Number.parseInt(answer, 10) === factsAnswer.answer ||
       answer === viewMove(factsAnswer).answers[factsAnswer.answer];
-    ret.push(correct ? `**${positive()}**` : `~~${negative()}~~`);
-    const explanation = factsAnswer.facts[factsAnswer.answer][2];
-    if (explanation) {
-      ret.push(explanation);
-    }
-    return ret;
+    const message = correct ? `**${positive()}**` : `~~${negative()}~~`;
+    const explanation = factsAnswer.facts[factsAnswer.answer].slice(...(correct ? [2, 3] : [2]));
+    return [message, ...explanation];
   }
 
   function checkAndAsk(i) {

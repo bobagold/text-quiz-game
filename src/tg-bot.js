@@ -10,11 +10,16 @@ const bot = new Telegraf(process.env.BOT_TOKEN);
 const facts = shuffle(load(readFileSync(process.argv[process.argv.length - 1])));
 const messages = load(readFileSync(process.argv[process.argv.length - 2]));
 
-const nextMove = infinitePlay({ facts, messages, viewMove: viewN1Move });
+const nextMove = infinitePlay({
+  facts,
+  messages,
+  viewMove: viewN1Move,
+  chunk: 5,
+});
 
 bot.hears(/.+/, ({ match, replyWithMarkdown: reply }) => {
   const { answer, question, answers } = nextMove(match[0]);
-  return reply(`${answer}\n\n${question}`, Markup.keyboard(answers).extra());
+  return reply(`${answer}\n\n${question}`, Markup.keyboard([answers.slice(0, 3), answers.slice(3)]).extra());
 });
 
 bot.startPolling();
