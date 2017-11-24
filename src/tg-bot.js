@@ -12,15 +12,29 @@ const messagesFile = files.shift();
 const games = files.map(file => shuffle(load(readFileSync(file))));
 const messages = load(readFileSync(messagesFile));
 
-const nextMove = infinitePlayManyGames({
-  games,
-  messages,
-  viewMove: viewN1Move,
-  chunk: 5,
-});
+const nextMove = {};
 
-bot.hears(/.+/, ({ match, replyWithMarkdown: reply }) => {
-  const { answer, question, answers } = nextMove(match[0]);
+function start(id, reply) {
+  nextMove[id] = infinitePlayManyGames({
+    games,
+    messages,
+    viewMove: viewN1Move,
+    chunk: 5,
+  });
+  const { question, answers } = nextMove[id]('');
+  return reply(
+    `Put proper word in a sentence:\n\n${question}`,
+    Markup.keyboard([answers.slice(0, 3), answers.slice(3)]).extra(),
+  );
+}
+
+bot.start(({ from: { id }, replyWithMarkdown: reply }) => start(id, reply));
+
+bot.hears(/.+/, ({ from: { id }, match, replyWithMarkdown: reply }) => {
+  if (!nextMove[id]) {
+    return start(id, reply);
+  }
+  const { answer, question, answers } = nextMove[id](match[0]);
   return reply(`${answer}\n\n${question}`, Markup.keyboard([answers.slice(0, 3), answers.slice(3)]).extra());
 });
 
