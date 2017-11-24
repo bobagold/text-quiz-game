@@ -1,12 +1,12 @@
 import move, { generateIndexes } from './game';
 import shuffleArray from './shuffle';
 
-function formatQuestion({ question, answers }) {
+export function formatQuestion({ question, answers }) {
   return `${question}: [${answers.map((a, i) => `**[${i}]** ${a}`).join(', ')}]`;
 }
 
 export default function play({
-  facts, messages, viewMove, chunk = 3, rand = Math.random, format = formatQuestion,
+  facts, messages, viewMove, chunk = 3, rand = Math.random,
 }) {
   function positive() {
     return messages.positive[Math.floor(rand() * messages.positive.length)];
@@ -34,7 +34,7 @@ export default function play({
         ret.answer = check(answer);
       }
       factsAnswer = move(facts, answers, chunk, i);
-      ret.question = format(viewMove(factsAnswer));
+      ret.question = viewMove(factsAnswer);
       return ret;
     };
   }
@@ -51,11 +51,8 @@ export default function play({
 }
 
 export function infinitePlay({ facts, shuffle = shuffleArray, ...overrides }) {
-  function format(q) {
-    return q;
-  }
   let nextMove = play({
-    facts, ...overrides, format,
+    facts, ...overrides,
   });
 
   return (message) => {
@@ -63,10 +60,29 @@ export function infinitePlay({ facts, shuffle = shuffleArray, ...overrides }) {
     const answer = currentMove.answer ? currentMove.answer.join('\n') : 'Hello!';
     if (!currentMove.question) {
       nextMove = play({
-        facts: shuffle(facts), ...overrides, format,
+        facts: shuffle(facts), ...overrides,
       });
       currentMove = nextMove();
     }
     return { answer, ...currentMove.question };
+  };
+}
+
+export function infinitePlayManyGames({ games, rand = Math.random, ...data }) {
+  const nextMoves = games.map(facts => infinitePlay({
+    facts, ...data,
+  }));
+  let currentGame = Math.floor(rand() * nextMoves.length);
+  const lastMoves = [];
+  return (answer) => {
+    const currentMove = nextMoves[currentGame](answer);
+    lastMoves[currentGame] = currentMove;
+    currentGame = Math.floor(rand() * nextMoves.length);
+    const nextMove = !lastMoves[currentGame] ? nextMoves[currentGame]('') : lastMoves[currentGame];
+    return {
+      answer: currentMove.answer,
+      question: nextMove.question,
+      answers: nextMove.answers,
+    };
   };
 }

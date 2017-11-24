@@ -7,6 +7,9 @@ export default function move(facts, answers, chunk, offset) {
 
 export function generateIndexes(a, chunk, rand) {
   const ret = [];
+  if (a.length === 1) {
+    return [0];
+  }
   for (let i = 0; i < Math.floor(a.length / chunk); i += 1) {
     ret.push(Math.floor(rand() * chunk));
   }
